@@ -140,7 +140,7 @@ class ImportDashboardsCommand(ImportModelsCommand):
                     }
                     dashboard_chart_ids.append(dashboard_chart_id)
 
-                db.execute(
+                db.session.execute(
                     delete(dashboard_slices).where(
                         dashboard_slices.c.dashboard_id == dashboard.id
                     )

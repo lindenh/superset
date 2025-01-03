@@ -745,12 +745,14 @@ class TestImportDashboardsCommand(SupersetTestCase):
         }
 
     @patch("superset.security.manager.g")
-    def test_import_v1_dashboard_overwrite_removes_deleted_charts(self, mock_g):
+    @patch("superset.commands.database.importers.v1.utils.add_permissions")
+    def test_import_v1_dashboard_overwrite_removes_deleted_charts(
+        self, mock_add_permissions, mock_g
+    ):
         """Test that existing dashboards are updated without old charts."""
         mock_g.user = security_manager.find_user("admin")
 
         num_dashboards = db.session.query(Dashboard).count()
-        num_charts = db.session.query(Slice).count()
 
         contents = {
             "metadata.yaml": yaml.safe_dump(dashboard_metadata_config),
@@ -759,7 +761,7 @@ class TestImportDashboardsCommand(SupersetTestCase):
             "charts/imported_chart.yaml": yaml.safe_dump(chart_config),
             "dashboards/imported_dashboard.yaml": yaml.safe_dump(dashboard_config),
         }
-        command = v1.ImportDashboardsCommand(contents)
+        command = v1.ImportDashboardsCommand(contents, overwrite=True)
         command.run()
 
         dashboard = (
